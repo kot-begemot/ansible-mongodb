@@ -22,13 +22,13 @@ opt.configsvr = true;
 // Set this to specify the replica set is a shard server
 {% endif %}
 
-{% for hn in rs_server_group %}
-opt.members.push({_id: {{ loop.index0 }}, host: '{{ hostvars[ hn ].fqdn }}:{{ rs_port }}'});
+{% for hn in rs_servers %}
+opt.members.push({_id: {{ loop.index0 }}, host: '{{ hn }}'});
 {% endfor %}
 
 rs.initiate(opt);
 
-{% if adminPass | length > 0 %}
+{% if scriptHost == bindIp %}
 // Create the user administrator and cluster administrator
 db.getSiblingDB("{{ auth_db }}").createUser({
     user: "{{ adminUser }}",

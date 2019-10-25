@@ -18,17 +18,84 @@
     - { dest: /etc/mongod.conf }
     - { dest: /etc/mongos.conf }
 
+- name: Remove all mongo config files
+  become: true
+  file:
+    dest: "{{ item.dest }}"
+    state: absent
+  with_items:
+    - { dest: /lib/systemd/system/mongodb-config.service }
+    - { dest: /lib/systemd/system/mongod-config.service }
+    - { dest: /lib/systemd/system/mongos-config.service }
+    - { dest: /etc/systemd/system/mongodb-config.service }
+    - { dest: /etc/systemd/system/mongod-config.service }
+    - { dest: /etc/systemd/system/mongos-config.service }
+    - { dest: /etc/mongodb-config.conf }
+    - { dest: /etc/mongod-config.conf }
+    - { dest: /etc/mongos-config.conf }
+  when: cluster_role == "config"
+
+- name: Remove all mongo config files
+  become: true
+  file:
+    dest: "{{ item.dest }}"
+    state: absent
+  with_items:
+    - { dest: /lib/systemd/system/mongodb-router.service }
+    - { dest: /lib/systemd/system/mongod-router.service }
+    - { dest: /lib/systemd/system/mongos-router.service }
+    - { dest: /etc/systemd/system/mongodb-router.service }
+    - { dest: /etc/systemd/system/mongod-router.service }
+    - { dest: /etc/systemd/system/mongos-router.service }
+    - { dest: /etc/mongodb-router.conf }
+    - { dest: /etc/mongod-router.conf }
+    - { dest: /etc/mongos-router.conf }
+  when: cluster_role == "router"
+
+- name: Remove all mongo config files
+  become: true
+  file:
+    dest: "{{ item.dest }}"
+    state: absent
+  with_items:
+    - { dest: /lib/systemd/system/mongodb-replicaSet.service }
+    - { dest: /lib/systemd/system/mongod-replicaSet.service }
+    - { dest: /lib/systemd/system/mongos-replicaSet.service }
+    - { dest: /etc/systemd/system/mongodb-replicaSet.service }
+    - { dest: /etc/systemd/system/mongod-replicaSet.service }
+    - { dest: /etc/systemd/system/mongos-replicaSet.service }
+    - { dest: /etc/mongodb-replicaSet.conf }
+    - { dest: /etc/mongod-replicaSet.conf }
+    - { dest: /etc/mongos-replicaSet.conf }
+  when: cluster_role == "replicaSet"
+
+- name: Remove all mongo config files
+  become: true
+  file:
+    dest: "{{ item.dest }}"
+    state: absent
+  with_items:
+    - { dest: /lib/systemd/system/mongodb-shard.service }
+    - { dest: /lib/systemd/system/mongod-shard.service }
+    - { dest: /lib/systemd/system/mongos-shard.service }
+    - { dest: /etc/systemd/system/mongodb-shard.service }
+    - { dest: /etc/systemd/system/mongod-shard.service }
+    - { dest: /etc/systemd/system/mongos-shard.service }
+    - { dest: /etc/mongodb-shard.conf }
+    - { dest: /etc/mongod-shard.conf }
+    - { dest: /etc/mongos-shard.conf }
+  when: cluster_role == "shard"
+
 - name: Put daemon or standalone mongo settings into place
   become: true
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
   with_items:
-    - {
-        src: ../templates/mongod.service.j2,
-        dest: /etc/systemd/system/mongod.service,
-      }
-    - { src: ../templates/mongod.conf.j2, dest: /etc/mongod.conf }
+    - src: ../templates/mongod.service.j2
+      dest: "/etc/systemd/system/mongod-{{ cluster_role }}.service"
+    - src: ../templates/mongod.conf.j2
+      dest: "/etc/mongod-{{ cluster_role }}.conf"
 
 - name: Reload the systemd daemon
   systemd:
@@ -38,7 +105,7 @@
 - name: Enable mongodb service
   become: true
   service:
-    name: mongod
+    name: mongod-{{ cluster_role }}
     enabled: true
 
 - name: Start the appropriate services

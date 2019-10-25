@@ -8,3 +8,47 @@
     - "{{ log_path }}/mongodb.log"
     - "{{ log_path }}/mongod.log"
     - "{{ log_path }}/mongos.log"
+
+- name: Kill logs
+  become: true
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ log_path }}/mongodb-shard.log"
+    - "{{ log_path }}/mongod-shard.log"
+    - "{{ log_path }}/mongos-shard.log"
+  when: cluster_role == "shard"
+
+- name: Kill logs
+  become: true
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ log_path }}/mongodb-config.log"
+    - "{{ log_path }}/mongod-config.log"
+    - "{{ log_path }}/mongos-config.log"
+  when: cluster_role == "config"
+
+- name: Kill logs
+  become: true
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ log_path }}/mongodb-router.log"
+    - "{{ log_path }}/mongod-router.log"
+    - "{{ log_path }}/mongos-router.log"
+  when: cluster_role == "router"
+
+- name: Kill logs
+  become: true
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ log_path }}/mongodb-replicaSet.log"
+    - "{{ log_path }}/mongod-replicaSet.log"
+    - "{{ log_path }}/mongos-replicaSet.log"
+  when: cluster_role == "replicaSet"

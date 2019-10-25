@@ -8,11 +8,8 @@
 - name: Run the add_shard_to_cluster script
   shell: >
     mongo
-    --host {{ fqdn }}
-    --port {{ rs_port }}
-    --ssl
-    --sslPEMKeyFile {{ cert_path.chain.remote }}
-    --sslCAFile {{ cert_path.intermediate.remote }}
+    --host {{ bindIp }}
+    --port {{ bindPort }}
     < /tmp/add_shard_to_cluster.js
   run_once: true
   become: true

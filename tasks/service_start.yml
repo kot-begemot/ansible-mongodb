@@ -2,5 +2,5 @@
 - name: Start mongodb service
   become: true
   service:
-      name: mongod
+      name: mongod-{{ cluster_role }}
       state: started

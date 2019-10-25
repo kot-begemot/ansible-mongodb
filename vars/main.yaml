@@ -1,14 +1,14 @@
 ---
 mount_base: /mnt/data
-mount_path: "{{ mount_base }}/mongodb"
-storage_path: /srv/mongodb
+mount_path: "{{ mount_base }}/mongodb-{{ cluster_role }}"
+storage_path: /srv/mongodb-{{ cluster_role }}
 
 log_path: "/var/log/mongodb"
-log_file: "{{ log_path }}/mongodb.log"
+log_file: "{{ log_path }}/mongodb-{{ cluster_role }}.log"
 
 keyfile_path: /srv/mongodb/mongodb-keyfile
 
-rs_servers: []
+cfg_servers: "{{ config_servers | default([]) }}"
 rs_server_group: []
 config_db: ""
 

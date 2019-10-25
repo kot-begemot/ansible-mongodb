@@ -26,3 +26,7 @@
 - name: Create Database
   include_tasks: create_database.yml
   when: ((['create_database'] | intersect(flags)) | length > 0)
+
+- name: Start service
+  include_tasks: service_start.yml
+  when: ((['start_service'] | intersect(flags)) | length > 0)

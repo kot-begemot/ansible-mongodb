@@ -7,7 +7,7 @@ Documentation=https://docs.mongodb.org/manual
 User=mongodb
 Group=mongodb
 {% if cluster_role == 'shard' or cluster_role == 'config' or cluster_role == 'replicaSet' %}
-ExecStart=/usr/bin/mongod --quiet --config /etc/mongod.conf
+ExecStart=/usr/bin/mongod --quiet --config /etc/mongod-{{ cluster_role }}.conf
 
 # Recommended limits for for mongod as specified in
 # https://docs.mongodb.com/manual/reference/ulimit/#recommended-ulimit-settings
@@ -24,7 +24,7 @@ LimitNOFILE=64000
 # (processes/threads)
 LimitNPROC=64000
 {% elif cluster_role == 'router' %}
-ExecStart=/usr/bin/mongos --quiet --config /etc/mongod.conf
+ExecStart=/usr/bin/mongos --quiet --config /etc/mongod-{{ cluster_role }}.conf
 {% endif %}
 
 [Install]

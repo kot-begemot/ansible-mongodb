@@ -10,17 +10,13 @@
   become: true
   template:
     src: templates/mongod.conf.j2
-    dest: /etc/mongod.conf
+    dest: "/etc/mongod-{{ cluster_role }}.conf"
     owner: root
     group: root
     mode: "u=rw,g=r,o=r"
 
 - name: Start the appropriate services
   include_tasks: service_start.yml
-
-- name: Delay
-  pause:
-    seconds: 5
 
 - name: Save the init_replica_set.js template to remote tmp
   template:
@@ -29,12 +25,16 @@
   run_once: true
 
 - name: Run the init_replica_set.js script
-  shell: mongo --port {{ rs_port }} < /tmp/init_replica_set.js
+  shell: >
+    mongo
+    --host {{ bindIp }}
+    --port {{ bindPort }}
+    < /tmp/init_replica_set.js
   run_once: true
   register: res_rsi
   until: res_rsi.rc == 0
-  retries: 10
-  delay: 5
+  retries: 5
+  delay: 20
   when: true
 
 - name: Remove the init_replica_set.js script from remote tmp
@@ -45,7 +45,7 @@
 - name: Stop the daemon service
   become: true
   service:
-    name: mongod
+    name: mongod-{{ cluster_role }}
     state: stopped
 
 - name: No longer configuring the replica set
@@ -56,7 +56,7 @@
   become: true
   template:
     src: templates/mongod.conf.j2
-    dest: /etc/mongod.conf
+    dest: "/etc/mongod-{{ cluster_role }}.conf"
     owner: root
     group: root
     mode: "u=rw,g=r,o=r"
@@ -64,5 +64,5 @@
 - name: Restart the daemon service
   become: true
   service:
-    name: mongod
+    name: mongod-{{ cluster_role }}
     state: started

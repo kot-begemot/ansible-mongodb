@@ -1,23 +1,23 @@
 ---
 - name: stat for mongodb
   stat:
-    path: /etc/systemd/system/mongodb.service
+    path: /etc/systemd/system/mongodb
   register: stat_db
 
 - name: stat for mongod
   stat:
-    path: /etc/systemd/system/mongod.service
+    path: "/etc/systemd/system/mongod-{{ cluster_role }}.service"
   register: stat_d
 
 - name: stat for mongos
   stat:
-    path: /etc/systemd/system/mongos.service
+    path: "/etc/systemd/system/mongos-{{ cluster_role }}.service"
   register: stat_s
 
 - name: Stop the daemon service
   become: true
   service:
-    name: mongod
+    name: mongod-{{ cluster_role }}
     state: stopped
   when:
     - stat_db.stat.exists
@@ -25,7 +25,7 @@
 - name: Stop the daemon service
   become: true
   service:
-    name: mongod
+    name: mongod-{{ cluster_role }}
     state: stopped
   when:
     - stat_d.stat.exists
@@ -33,7 +33,7 @@
 - name: Stop the shard service
   become: true
   service:
-    name: mongos
+    name: mongos-{{ cluster_role }}
     state: stopped
   when:
     - stat_s.stat.exists
