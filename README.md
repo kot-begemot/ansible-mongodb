@@ -86,27 +86,70 @@ vars:
 ## Examples
 
 ```yaml
-- hosts: all
+---
+- name: configure Mongo config servers
+  hosts: db # Database group
   vars:
-    auth_db: ""
+    cluster_role: "config"
     adminUser: ""
     adminPass: ""
-    tgt_db: ""
+    scriptHost: "" # where you want to execute the scripts on
+    bindIp: "{{ ansible_local.cluster.interface.ip }}"
+    config_servers: ['host1:27019', 'host2:27019', 'host3:27019']
+    cfg_server:
+      name: "cluster-config"
+    replica_set:
+      name: "cluste-config-replica" # name of the replica set for the config server (prefix of fqdn)
+  roles:
+    - { role: pgkehle.mongodb, flags: ['install', 'skip_service_start'] }
+    - { role: pgkehle.mongodb, flags: ['save_config'] }
+    - { role: pgkehle.mongodb, flags: ['reset_storage'] }
+    - { role: pgkehle.mongodb, flags: ['init_replica_set'] }
+
+- name: configure Mongo config servers
+  hosts: db # Database group
+  vars:
+    cluster_role: "shard"
+    adminUser: ""
+    adminPass: ""
+    scriptHost: "" # where you want to execute the scripts on
+    bindIp: "{{ ansible_local.cluster.interface.ip }}"
+    config_servers: ['host1:27019', 'host2:27019', 'host3:27019']
+    shard_servers: ['host1:27018', 'host2:27018', 'host3:27018']
+    cfg_server:
+      name: "cluster-config"
+    replica_set:
+      name: "cluster-shard-replica" # name of the replica set for the config server (prefix of fqdn)
+  roles:
+    - { role: pgkehle.mongodb, flags: ['install', 'skip_service_start'] }
+    - { role: pgkehle.mongodb, flags: ['save_config'] }
+    - { role: pgkehle.mongodb, flags: ['reset_storage'] }
+    - { role: pgkehle.mongodb, flags: ['init_replica_set'] }
+
+- name: configure Mongo route servers
+  hosts: web1 # Load balancer server or application server
+  vars:
+    cluster_role: "router"
     userName: ""
     userPass: ""
-    roles: ["readWrite", "userAdmin"]
-
-    # For when initializing the replica set
-    adminUser: ''
-    adminPass: ''
-
+    tgt_db: "" # application database name
+    roles: ["readWrite", "userAdmin"] # user roles
+    adminUser: ""
+    adminPass: ""
+    scriptHost: "{{ ansible_local.cluster.interface.ip }}"
+    bindIp: "{{ ansible_local.cluster.interface.ip }}"
+    config_servers: ['host1:27019', 'host2:27019', 'host3:27019']
+    shard_servers: ['host1:27018', 'host2:27018', 'host3:27018']
+    cfg_server:
+      name: "cluster-config-replica"
+    replica_set:
+      name: "cluster-shard-replica" # name of the replica set for the config server (prefix of fqdn)
   roles:
     - { role: pgkehle.mongodb, flags: ['install'] }
     - { role: pgkehle.mongodb, flags: ['save_config'] }
     - { role: pgkehle.mongodb, flags: ['reset_storage'] }
-    - { role: pgkehle.mongodb, flags: ['init_replica_set'] }
-    - { role: pgkehle.mongodb, flags: ['add_shard_to_cluster'] }
     - { role: pgkehle.mongodb, flags: ['create_database'] }
+    - { role: pgkehle.mongodb, flags: ['add_shard_to_cluster'] }
 ```
 
 ## Linting
